@@ -15,7 +15,6 @@ export class ContentularService {
         @Inject(ContentularConfigService) private config,
         private http: HttpClient,
     ) {
-        this.getAll();
     }
 
     getAll() {
@@ -23,7 +22,7 @@ export class ContentularService {
             headers: {'x-api-key': this.config.apiKey}
         })
             .pipe(
-                tap((stories: any[]) => this.cacheStories(stories)),
+                tap((stories: Story[]) => this.cacheStories(stories)),
                 catchError(async e => {
                     const stories = JSON.parse(localStorage.getItem('stories'));
 
@@ -38,7 +37,6 @@ export class ContentularService {
     }
 
     findBySlug(slug: string): Observable<Story> {
-        // return this.http.get(`${this.config.apiUrl}/stories`, {params: {slug}});
         return this.stories$.pipe(
             mergeMap( x => x),
             filter(story => story.slug === slug),
