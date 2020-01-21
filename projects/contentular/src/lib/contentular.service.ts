@@ -3,18 +3,23 @@ import { Inject, Injectable } from '@angular/core';
 import { Observable, ReplaySubject } from 'rxjs';
 import { catchError, filter, mergeMap, take, tap } from 'rxjs/operators';
 import { Story } from './contentular.interfaces';
-import { ContentularConfigService } from './contentular.module';
+import { CONTENTULAR_CONFIG, ContentularConfig } from './contentular.module';
 
 @Injectable({
     providedIn: 'root'
 })
 export class ContentularService {
     stories$ = new ReplaySubject<Story[]>(1);
+    config: ContentularConfig;
 
     constructor(
-        @Inject(ContentularConfigService) private config,
+        @Inject(CONTENTULAR_CONFIG) private contentularConfig,
         private http: HttpClient,
     ) {
+        this.config = {
+            apiUrl: 'https://app.contentular.de/api',
+            ...contentularConfig
+        };
     }
 
     getAll() {

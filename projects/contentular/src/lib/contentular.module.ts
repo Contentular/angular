@@ -10,11 +10,7 @@ export interface ContentularConfig {
     apiKey: string;
 }
 
-export const ContentularConfigService = new InjectionToken<ContentularConfig>('ContentularConfig');
-
-const defaultConfig: Partial<ContentularConfig> = {
-    apiUrl: 'https://app.contentular.de/api'
-};
+export const CONTENTULAR_CONFIG = new InjectionToken<ContentularConfig>('contentular.config');
 
 @NgModule({
     declarations: [ContentularComponent],
@@ -24,14 +20,12 @@ const defaultConfig: Partial<ContentularConfig> = {
     exports: [ContentularComponent]
 })
 export class ContentularModule {
-    static forRoot(customConfig: ContentularConfig): ModuleWithProviders {
-        const config = {...defaultConfig, ...customConfig};
-
+    static forRoot(config: ContentularConfig): ModuleWithProviders<ContentularModule> {
         return {
             ngModule: ContentularModule,
             providers: [
                 {
-                    provide: ContentularConfigService,
+                    provide: CONTENTULAR_CONFIG,
                     useValue: config
                 }
             ]

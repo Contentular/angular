@@ -1,4 +1,6 @@
 import {
+    ChangeDetectionStrategy,
+    ChangeDetectorRef,
     Component,
     ComponentFactoryResolver,
     Inject,
@@ -9,14 +11,15 @@ import {
     ViewContainerRef
 } from '@angular/core';
 import { Content } from '../contentular.interfaces';
-import { ContentularConfigService } from '../contentular.module';
+import { CONTENTULAR_CONFIG, ContentularConfig } from '../contentular.module';
 
 @Component({
     selector: 'contentular',
     template: `
         <ng-template #templateRef></ng-template>
     `,
-    styleUrls: ['./contentular.component.scss']
+    styleUrls: ['./contentular.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ContentularComponent implements OnInit {
     @ViewChild('templateRef', {read: ViewContainerRef, static: true}) templateRef: ViewContainerRef;
@@ -37,19 +40,16 @@ export class ContentularComponent implements OnInit {
         const componentRef = viewContainerRef.createComponent(componentFactory);
         (<{ content: Content }>componentRef.instance).content = content;
 
-        // add classes to fields then adding this classes to component wrapper
-        if (content.fields && content.fields.class !== '' && content.fields.class !== undefined) {
-            const classArray = content.fields.class.split(/[ ,]+/);
-            classArray.forEach((className) => this.renderer2.addClass(componentRef.location.nativeElement, className));
-        }
+        this.cdr.markForCheck();
     }
 
 
     constructor(
-        @Inject(ContentularConfigService) private config,
+        @Inject(CONTENTULAR_CONFIG) private config: ContentularConfig,
         private viewContainerRef: ViewContainerRef,
         private componentFactoryResolver: ComponentFactoryResolver,
         private renderer2: Renderer2,
+        private cdr: ChangeDetectorRef,
     ) {
     }
 
