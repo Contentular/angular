@@ -1,16 +1,8 @@
 import { HttpClientModule } from '@angular/common/http';
 import { InjectionToken, ModuleWithProviders, NgModule } from '@angular/core';
 import { ContentularComponent } from './components/contentular.component';
+import { CONTENTULAR_CONFIG, ContentularConfig } from './contentular.config';
 
-export interface ContentularConfig {
-    componentMap: {
-        [propName: string]: any
-    };
-    apiUrl?: string;
-    apiKey: string;
-}
-
-export const CONTENTULAR_CONFIG = new InjectionToken<ContentularConfig>('contentular.config');
 
 @NgModule({
     declarations: [ContentularComponent],
@@ -29,7 +21,7 @@ export class ContentularModule {
                     useValue: config
                 }
             ]
-        }
+        };
     }
 
 }

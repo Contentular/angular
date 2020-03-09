@@ -10,8 +10,8 @@ import {
     ViewChild,
     ViewContainerRef
 } from '@angular/core';
+import { CONTENTULAR_CONFIG, ContentularConfig } from '../contentular.config';
 import { Content } from '../contentular.interfaces';
-import { CONTENTULAR_CONFIG, ContentularConfig } from '../contentular.module';
 
 @Component({
     selector: 'contentular',
@@ -38,7 +38,7 @@ export class ContentularComponent implements OnInit {
         viewContainerRef.clear();
 
         const componentRef = viewContainerRef.createComponent(componentFactory);
-        (<{ content: Content }>componentRef.instance).content = content;
+        (componentRef.instance as { content: Content }).content = content;
 
         this.cdr.markForCheck();
     }

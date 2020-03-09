@@ -3,7 +3,7 @@ import { Inject, Injectable } from '@angular/core';
 import { Observable, ReplaySubject } from 'rxjs';
 import { catchError, filter, mergeMap, take, tap } from 'rxjs/operators';
 import { Story } from './contentular.interfaces';
-import { CONTENTULAR_CONFIG, ContentularConfig } from './contentular.module';
+import { CONTENTULAR_CONFIG, ContentularConfig } from './contentular.config';
 
 @Injectable({
     providedIn: 'root'
