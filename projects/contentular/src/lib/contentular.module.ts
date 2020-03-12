@@ -1,6 +1,8 @@
 import { HttpClientModule } from '@angular/common/http';
-import { InjectionToken, ModuleWithProviders, NgModule } from '@angular/core';
+import { ModuleWithProviders, NgModule } from '@angular/core';
+
 import { ContentularComponent } from './components/contentular.component';
+import { ContentularCachingStrategy } from './contentular-caching.strategy';
 import { CONTENTULAR_CONFIG, ContentularConfig } from './contentular.config';
 
 
@@ -12,7 +14,12 @@ import { CONTENTULAR_CONFIG, ContentularConfig } from './contentular.config';
     exports: [ContentularComponent]
 })
 export class ContentularModule {
-    static forRoot(config: ContentularConfig): ModuleWithProviders<ContentularModule> {
+    static forRoot(userConfig: ContentularConfig): ModuleWithProviders<ContentularModule> {
+        const config: ContentularConfig = {
+            cachingStrategy: ContentularCachingStrategy.networkOnly,
+            persistentCache: false,
+            ...userConfig
+        };
         return {
             ngModule: ContentularModule,
             providers: [
@@ -23,5 +30,4 @@ export class ContentularModule {
             ]
         };
     }
-
 }

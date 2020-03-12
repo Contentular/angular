@@ -24,7 +24,10 @@
       ],
       "contentular/*": [
         "dist/contentular/*"
-      ]
+      ],
+        "@angular/*": [
+            "./node_modules/@angular/*"
+        ]
     }
   },
   "angularCompilerOptions": {
