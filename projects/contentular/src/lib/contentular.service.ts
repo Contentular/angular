@@ -1,10 +1,11 @@
-import { HttpClient } from '@angular/common/http';
-import { Inject, Injectable } from '@angular/core';
-import { Observable, of, ReplaySubject } from 'rxjs';
-import { catchError, map, switchMap, take, tap } from 'rxjs/operators';
-import { ContentularCachingStrategy } from './contentular-caching.strategy';
-import { CONTENTULAR_CONFIG, ContentularConfig } from './contentular.config';
-import { Story } from './contentular.interfaces';
+import {HttpClient} from '@angular/common/http';
+import {Inject, Injectable, PLATFORM_ID} from '@angular/core';
+import {Observable, of, ReplaySubject} from 'rxjs';
+import {catchError, map, switchMap, take, tap} from 'rxjs/operators';
+import {ContentularCachingStrategy} from './contentular-caching.strategy';
+import {CONTENTULAR_CONFIG, ContentularConfig} from './contentular.config';
+import {Story} from './contentular.interfaces';
+import {isPlatformBrowser, isPlatformServer} from '@angular/common';
 
 interface ContentularCache {
     loadedAllOnce: boolean;
@@ -28,16 +29,24 @@ export class ContentularService {
         cacheFiles: [],
     };
 
+    private localStorageAvailable: boolean;
+
     private defaultRequestOptions: ContentularRequestOptions;
 
     constructor(
         @Inject(CONTENTULAR_CONFIG) private contentularConfig,
+        @Inject(PLATFORM_ID) private platformId,
         private http: HttpClient,
     ) {
-        this.config = {
-            apiUrl: 'https://app.contentular.de/api',
-            ...contentularConfig
-        };
+        this.localStorageAvailable = this.checkForStorage();
+        if (isPlatformServer(this.platformId)) {
+            console.log('Storage available:', this.localStorageAvailable)
+        }
+
+            this.config = {
+                apiUrl: 'https://app.contentular.de/api',
+                ...contentularConfig
+            };
 
         this.defaultRequestOptions = {
             cachingStrategy: this.config.cachingStrategy
@@ -46,6 +55,18 @@ export class ContentularService {
         this.setupInitialCache();
         if (this.config.persistentCache) {
             this.persistCache();
+        }
+    }
+
+
+    private checkForStorage(): boolean {
+        const test = 'test';
+        try {
+            localStorage.setItem(test, test);
+            localStorage.removeItem(test);
+            return true;
+        } catch (e) {
+            return false;
         }
     }
 
@@ -212,22 +233,29 @@ export class ContentularService {
     }
 
     private setupInitialCache() {
-        const cacheExists = localStorage.getItem(this.config.apiKey);
-        if (cacheExists && this.config.persistentCache) {
+        let existingCache;
+        if (this.localStorageAvailable) {
+            existingCache = localStorage.getItem(this.config.apiKey);
+        }
+        if (existingCache && this.localStorageAvailable && this.config.persistentCache) {
             const cache = {
                 ...this.defaultCache,
-                ...JSON.parse(cacheExists)
+                ...JSON.parse(existingCache)
             };
             this.cache$.next(cache);
         } else {
-            localStorage.removeItem(this.config.apiKey);
+            if (this.localStorageAvailable) {
+                localStorage.removeItem(this.config.apiKey);
+            }
             this.cache$.next(this.defaultCache);
         }
     }
 
     private persistCache() {
         this.cache$.subscribe(cache => {
-                localStorage.setItem(this.config.apiKey, JSON.stringify(cache))
+                if (this.localStorageAvailable) {
+                    localStorage.setItem(this.config.apiKey, JSON.stringify(cache))
+                }
             }
         )
     }

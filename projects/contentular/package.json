@@ -1,9 +1,10 @@
 {
-  "name": "@contentular/angular",
-  "version": "0.0.5",
-  "peerDependencies": {
-    "@angular/common": "^9.0.5",
-    "@angular/core": "^9.0.5"
-  },
-  "license": "MIT"
+    "name": "@contentular/angular",
+    "version": "0.0.7",
+    "peerDependencies": {
+        "@angular/common": "^9.0.5",
+        "@angular/core": "^9.0.5"
+    },
+    "license": "MIT",
+    "dependencies": {}
 }
