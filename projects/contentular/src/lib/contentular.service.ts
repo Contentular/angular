@@ -1,11 +1,11 @@
-import {HttpClient} from '@angular/common/http';
-import {Inject, Injectable, PLATFORM_ID} from '@angular/core';
-import {Observable, of, ReplaySubject} from 'rxjs';
-import {catchError, map, switchMap, take, tap} from 'rxjs/operators';
-import {ContentularCachingStrategy} from './contentular-caching.strategy';
-import {CONTENTULAR_CONFIG, ContentularConfig} from './contentular.config';
-import {Story} from './contentular.interfaces';
-import {isPlatformBrowser, isPlatformServer} from '@angular/common';
+import { isPlatformServer } from '@angular/common';
+import { HttpClient, HttpHandler } from '@angular/common/http';
+import { Inject, Injectable, PLATFORM_ID } from '@angular/core';
+import { Observable, of, ReplaySubject } from 'rxjs';
+import { catchError, map, switchMap, take, tap } from 'rxjs/operators';
+import { ContentularCachingStrategy } from './contentular-caching.strategy';
+import { CONTENTULAR_CONFIG, ContentularConfig } from './contentular.config';
+import { Story } from './contentular.interfaces';
 
 interface ContentularCache {
     loadedAllOnce: boolean;
@@ -29,24 +29,26 @@ export class ContentularService {
         cacheFiles: [],
     };
 
-    private localStorageAvailable: boolean;
-
-    private defaultRequestOptions: ContentularRequestOptions;
+    private readonly localStorageAvailable: boolean;
+    private readonly defaultRequestOptions: ContentularRequestOptions;
+    private readonly http: HttpClient;
 
     constructor(
         @Inject(CONTENTULAR_CONFIG) private contentularConfig,
         @Inject(PLATFORM_ID) private platformId,
-        private http: HttpClient,
+        private httpHandler: HttpHandler,
     ) {
+        this.http = new HttpClient(httpHandler);
+
         this.localStorageAvailable = this.checkForStorage();
         if (isPlatformServer(this.platformId)) {
             console.log('Storage available:', this.localStorageAvailable)
         }
 
-            this.config = {
-                apiUrl: 'https://app.contentular.de/api',
-                ...contentularConfig
-            };
+        this.config = {
+            apiUrl: 'https://app.contentular.de/api',
+            ...contentularConfig
+        };
 
         this.defaultRequestOptions = {
             cachingStrategy: this.config.cachingStrategy

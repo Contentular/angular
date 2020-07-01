@@ -37,6 +37,10 @@
           }
         }
       }
-    }},
-  "defaultProject": "contentular"
+    }
+  },
+  "defaultProject": "contentular",
+  "cli": {
+    "analytics": false
+  }
 }
