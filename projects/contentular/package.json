@@ -2,9 +2,11 @@
     "name": "@contentular/angular",
     "version": "0.0.7",
     "peerDependencies": {
-        "@angular/common": "^9.0.5",
-        "@angular/core": "^9.0.5"
+        "@angular/common": "^9.1.0",
+        "@angular/core": "^9.1.0"
     },
     "license": "MIT",
-    "dependencies": {}
+    "dependencies": {
+    "tslib": "^2.0.0"
+}
 }

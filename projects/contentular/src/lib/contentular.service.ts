@@ -1,11 +1,12 @@
 import { isPlatformServer } from '@angular/common';
-import { HttpClient, HttpHandler } from '@angular/common/http';
+import { HttpBackend, HttpClient } from '@angular/common/http';
 import { Inject, Injectable, PLATFORM_ID } from '@angular/core';
 import { Observable, of, ReplaySubject } from 'rxjs';
 import { catchError, map, switchMap, take, tap } from 'rxjs/operators';
 import { ContentularCachingStrategy } from './contentular-caching.strategy';
 import { CONTENTULAR_CONFIG, ContentularConfig } from './contentular.config';
 import { Story } from './contentular.interfaces';
+import { ContentularModule } from './contentular.module';
 
 interface ContentularCache {
     loadedAllOnce: boolean;
@@ -17,7 +18,7 @@ interface ContentularRequestOptions {
 }
 
 @Injectable({
-    providedIn: 'root'
+    providedIn: ContentularModule
 })
 export class ContentularService {
     private cache$ = new ReplaySubject<ContentularCache>(1);
@@ -36,7 +37,7 @@ export class ContentularService {
     constructor(
         @Inject(CONTENTULAR_CONFIG) private contentularConfig,
         @Inject(PLATFORM_ID) private platformId,
-        private httpHandler: HttpHandler,
+        private httpHandler: HttpBackend,
     ) {
         this.http = new HttpClient(httpHandler);
 
