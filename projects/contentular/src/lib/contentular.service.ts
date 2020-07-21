@@ -43,7 +43,7 @@ export class ContentularService {
 
         this.localStorageAvailable = this.checkForStorage();
         if (isPlatformServer(this.platformId)) {
-            console.log('Storage available:', this.localStorageAvailable)
+            console.log('Storage available:', this.localStorageAvailable);
         }
 
         this.config = {
@@ -99,32 +99,35 @@ export class ContentularService {
                 tap(() => this.loadedAllOnce = true),
                 catchError(err => {
                     // console.log('cant get stories');
-                    throw err
+                    throw err;
                 })
             );
-    };
+    }
 
     private loadAllNetworkFirst(): Observable<Story[]> {
         const apiCall = this.createApiCall() as Observable<Story[]>;
         return apiCall.pipe(
             tap(stories => {
                 this.loadedAllOnce = true;
-                this.updateCache(stories)
+                this.updateCache(stories);
             }),
             catchError(err => {
                     // console.log('cant get stories');
                     // console.log('return cache');
+                    if (err.status === 404) {
+                        this.removeAllFromCache();
+                    }
                     return this.currentCache$
                         .pipe(
                             take(1),
                             map(cache => cache.cacheFiles),
                             map(cachedStories => {
                                 if (cachedStories.length === 0) {
-                                    throw {msg: 'No Data available'}
+                                    throw {msg: 'No Data available'};
                                 }
-                                return cachedStories
+                                return cachedStories;
                             })
-                        )
+                        );
                 }
             )
         );
@@ -140,18 +143,22 @@ export class ContentularService {
                     return apiCall.pipe(
                         tap(stories => {
                             this.loadedAllOnce = true;
-                            this.updateCache(stories)
+                            this.updateCache(stories);
                         }),
                         catchError(err => {
                                 // console.log('cant get stories');
+
+                                if (err.status === 404) {
+                                    this.removeAllFromCache();
+                                }
                                 throw {msg: 'No Data available', err};
                             }
                         )
-                    )
+                    );
                 }
-                return of(cache.cacheFiles)
+                return of(cache.cacheFiles);
             })
-        )
+        );
     }
 
     public findBySlug(slug: string, options?: ContentularRequestOptions): Observable<Story[]> {
@@ -180,7 +187,7 @@ export class ContentularService {
             .pipe(
                 catchError(err => {
                     // console.log('cant get stories with slug');
-                    throw err
+                    throw err;
                 }));
     }
 
@@ -198,26 +205,32 @@ export class ContentularService {
                             this.updateCache(loadedStories);
                         }),
                         catchError(err => {
+                                if (err.status === 404) {
+                                    this.removeFromCache(slug);
+                                }
                                 // console.log('cant get stories');
                                 throw {msg: 'No Data available', err};
                             }
                         )
-                    )
+                    );
                 }
-                return of(cache)
+                return of(cache);
             })
-        )
+        );
     }
 
     private loadBySlugNetworkFirst(slug: string): Observable<Story[]> {
         const apiCall = this.createApiCall(slug);
         return apiCall.pipe(
             tap(stories => {
-                this.updateCache(stories)
+                this.updateCache(stories);
             }),
             catchError(err => {
                     // console.log('cant get stories with slug');
                     // console.log('return cache');
+                    if (err.status === 404) {
+                        this.removeFromCache(slug);
+                    }
                     return this.cache$
                         .pipe(
                             take(1),
@@ -225,11 +238,11 @@ export class ContentularService {
                             map(cache => cache.filter(story => story.slug === slug)),
                             map(cacheMap => {
                                 if (cacheMap.length === 0) {
-                                    throw {msg: 'No Data available'}
+                                    throw {msg: 'No Data available'};
                                 }
-                                return cacheMap
+                                return cacheMap;
                             })
-                        )
+                        );
                 }
             )
         );
@@ -257,10 +270,10 @@ export class ContentularService {
     private persistCache() {
         this.cache$.subscribe(cache => {
                 if (this.localStorageAvailable) {
-                    localStorage.setItem(this.config.apiKey, JSON.stringify(cache))
+                    localStorage.setItem(this.config.apiKey, JSON.stringify(cache));
                 }
             }
-        )
+        );
     }
 
     private updateCache(stories: Story[]) {
@@ -274,7 +287,7 @@ export class ContentularService {
                 if (cacheIndex > -1) {
                     cachedFiles[cacheIndex] = story;
                 } else {
-                    cachedFiles.push(story)
+                    cachedFiles.push(story);
                 }
             });
             const updatedCache: ContentularCache = {
@@ -283,6 +296,30 @@ export class ContentularService {
             };
             this.cache$.next(updatedCache);
         });
+    }
+
+    private removeFromCache(slug: string) {
+        // console.log('remove from Cache');
+        this.cache$.pipe(
+            take(1),
+        ).subscribe(currentCache => {
+            const cachedFiles: Story[] = [...currentCache.cacheFiles];
+            const updatedCachedFiles = cachedFiles.filter(story => story.slug !== slug);
+            const updatedCache: ContentularCache = {
+                loadedAllOnce: this.loadedAllOnce,
+                cacheFiles: updatedCachedFiles,
+            };
+            this.cache$.next(updatedCache);
+        });
+    }
+
+    private removeAllFromCache() {
+        // console.log('remove all from Cache');
+        const updatedCache: ContentularCache = {
+            loadedAllOnce: this.loadedAllOnce,
+            cacheFiles: [],
+        };
+        this.cache$.next(updatedCache);
     }
 
     private createApiCall(slug?: string): Observable<Story[]> {
