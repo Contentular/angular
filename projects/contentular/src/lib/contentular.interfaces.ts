@@ -3,6 +3,9 @@ export interface Story {
     title: string;
     slug: string;
     contents: Content[];
+    seoKeywords: string;
+    seoDescription: string;
+    seoTitle: string;
 }
 
 export interface Content<T = any> {

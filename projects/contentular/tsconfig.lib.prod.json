@@ -1,7 +1,11 @@
 {
     "extends": "./tsconfig.lib.json",
     "angularCompilerOptions": {
-        "enableIvy": false,
-        "strictMetadataEmit": false
+        "skipTemplateCodegen": true,
+        "strictMetadataEmit": true,
+        "fullTemplateTypeCheck": true,
+        "strictInjectionParameters": true,
+        "enableResourceInlining": true,
+        "enableIvy": false
     }
 }

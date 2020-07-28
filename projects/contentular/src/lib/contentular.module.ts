@@ -9,7 +9,7 @@ import { CONTENTULAR_CONFIG, ContentularConfig } from './contentular.config';
 @NgModule({
     declarations: [ContentularComponent],
     imports: [
-        HttpClientModule
+        HttpClientModule,
     ],
     exports: [ContentularComponent]
 })
