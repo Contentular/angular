@@ -1,12 +1,20 @@
 {
-    "name": "@contentular/angular",
-    "version": "0.0.15",
-    "peerDependencies": {
-        "@angular/common": "^9.1.0",
-        "@angular/core": "^9.1.0"
-    },
-    "license": "MIT",
-    "dependencies": {
+  "name": "@contentular/angular",
+  "version": "0.0.16",
+  "peerDependencies": {
+    "@angular/common": "^9.1.0",
+    "@angular/core": "^9.1.0"
+  },
+  "license": "MIT",
+  "dependencies": {
     "tslib": "^2.0.0"
-}
+  },
+  "main": "bundles/contentular-angular.umd.js",
+  "module": "fesm2015/contentular-angular.js",
+  "es2015": "fesm2015/contentular-angular.js",
+  "esm2015": "esm2015/contentular-angular.js",
+  "fesm2015": "fesm2015/contentular-angular.js",
+  "typings": "contentular-angular.d.ts",
+  "metadata": "contentular-angular.metadata.json",
+  "sideEffects": false
 }

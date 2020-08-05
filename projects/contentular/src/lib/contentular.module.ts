@@ -15,17 +15,16 @@ import { CONTENTULAR_CONFIG, ContentularConfig } from './contentular.config';
 })
 export class ContentularModule {
     static forRoot(userConfig: ContentularConfig): ModuleWithProviders<ContentularModule> {
-        const config: ContentularConfig = {
-            cachingStrategy: ContentularCachingStrategy.networkOnly,
-            persistentCache: false,
-            ...userConfig
-        };
         return {
             ngModule: ContentularModule,
             providers: [
                 {
                     provide: CONTENTULAR_CONFIG,
-                    useValue: config
+                    useValue: {
+                        cachingStrategy: ContentularCachingStrategy.networkOnly,
+                        persistentCache: false,
+                        ...userConfig
+                    }
                 }
             ]
         };
