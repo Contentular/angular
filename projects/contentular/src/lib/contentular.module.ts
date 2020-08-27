@@ -1,17 +1,26 @@
 import { HttpClientModule } from '@angular/common/http';
-import { ModuleWithProviders, NgModule } from '@angular/core';
+import { InjectionToken, ModuleWithProviders, NgModule } from '@angular/core';
 
 import { ContentularComponent } from './components/contentular.component';
 import { ContentularCachingStrategy } from './contentular-caching.strategy';
 import { CONTENTULAR_CONFIG, ContentularConfig } from './contentular.config';
 
+const ROOT_OPTIONS = new InjectionToken<ContentularConfig>('ROOT_OPTIONS');
+
+export function contentularConfigFactory (options: ContentularConfig) {
+    return {
+        cachingStrategy: ContentularCachingStrategy.networkOnly,
+        persistentCache: false,
+        ...options,
+    };
+}
 
 @NgModule({
     declarations: [ContentularComponent],
     imports: [
         HttpClientModule,
     ],
-    exports: [ContentularComponent]
+    exports: [ContentularComponent],
 })
 export class ContentularModule {
     static forRoot(userConfig: ContentularConfig): ModuleWithProviders<ContentularModule> {
@@ -19,14 +28,15 @@ export class ContentularModule {
             ngModule: ContentularModule,
             providers: [
                 {
+                    provide: ROOT_OPTIONS,
+                    useValue: userConfig,
+                },
+                {
                     provide: CONTENTULAR_CONFIG,
-                    useValue: {
-                        cachingStrategy: ContentularCachingStrategy.networkOnly,
-                        persistentCache: false,
-                        ...userConfig
-                    }
-                }
-            ]
+                    useFactory: contentularConfigFactory,
+                    deps: [ROOT_OPTIONS],
+                },
+            ],
         };
     }
 }

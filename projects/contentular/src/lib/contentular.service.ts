@@ -1,5 +1,5 @@
 import { isPlatformServer } from '@angular/common';
-import { HttpBackend, HttpClient } from '@angular/common/http';
+import { HttpBackend, HttpClient, HttpHeaders } from '@angular/common/http';
 import { Inject, Injectable, PLATFORM_ID } from '@angular/core';
 import { Observable, of, ReplaySubject } from 'rxjs';
 import { catchError, map, switchMap, take, tap } from 'rxjs/operators';
@@ -18,7 +18,7 @@ interface ContentularRequestOptions {
 }
 
 @Injectable({
-    providedIn: ContentularModule
+    providedIn: ContentularModule,
 })
 export class ContentularService {
     private cache$ = new ReplaySubject<ContentularCache>(1);
@@ -48,11 +48,11 @@ export class ContentularService {
 
         this.config = {
             apiUrl: 'https://app.contentular.de/api',
-            ...contentularConfig
+            ...contentularConfig,
         };
 
         this.defaultRequestOptions = {
-            cachingStrategy: this.config.cachingStrategy
+            cachingStrategy: this.config.cachingStrategy,
         };
 
         this.setupInitialCache();
@@ -76,7 +76,7 @@ export class ContentularService {
     public getAll(options?: ContentularRequestOptions): Observable<Story[]> {
         const requestOptions = {
             ...this.defaultRequestOptions,
-            ...options
+            ...options,
         };
         // console.log('current-strategy', requestOptions.cachingStrategy);
 
@@ -100,7 +100,7 @@ export class ContentularService {
                 catchError(err => {
                     // console.log('cant get stories');
                     throw err;
-                })
+                }),
             );
     }
 
@@ -126,10 +126,10 @@ export class ContentularService {
                                     throw {msg: 'No Data available'};
                                 }
                                 return cachedStories;
-                            })
+                            }),
                         );
-                }
-            )
+                },
+            ),
         );
     }
 
@@ -152,19 +152,19 @@ export class ContentularService {
                                     this.removeAllFromCache();
                                 }
                                 throw {msg: 'No Data available', err};
-                            }
-                        )
+                            },
+                        ),
                     );
                 }
                 return of(cache.cacheFiles);
-            })
+            }),
         );
     }
 
     public findBySlug(slug: string, options?: ContentularRequestOptions): Observable<Story[]> {
         const requestOptions = {
             ...this.defaultRequestOptions,
-            ...options
+            ...options,
         };
         // console.log('current-strategy', requestOptions.cachingStrategy);
 
@@ -210,12 +210,12 @@ export class ContentularService {
                                 }
                                 // console.log('cant get stories');
                                 throw {msg: 'No Data available', err};
-                            }
-                        )
+                            },
+                        ),
                     );
                 }
                 return of(cache);
-            })
+            }),
         );
     }
 
@@ -241,10 +241,10 @@ export class ContentularService {
                                     throw {msg: 'No Data available'};
                                 }
                                 return cacheMap;
-                            })
+                            }),
                         );
-                }
-            )
+                },
+            ),
         );
     }
 
@@ -256,7 +256,7 @@ export class ContentularService {
         if (existingCache && this.localStorageAvailable && this.config.persistentCache) {
             const cache = {
                 ...this.defaultCache,
-                ...JSON.parse(existingCache)
+                ...JSON.parse(existingCache),
             };
             this.cache$.next(cache);
         } else {
@@ -272,7 +272,7 @@ export class ContentularService {
                 if (this.localStorageAvailable) {
                     localStorage.setItem(this.config.apiKey, JSON.stringify(cache));
                 }
-            }
+            },
         );
     }
 
@@ -325,9 +325,10 @@ export class ContentularService {
     private createApiCall(slug?: string): Observable<Story[]> {
         const baseUrl = `${this.config.apiUrl}/stories/frontend`;
         const url = slug ? baseUrl + '?slug=' + slug : baseUrl;
-        const options = {
-            headers: {'x-api-key': this.config.apiKey}
-        };
+
+        const headers = new HttpHeaders({'x-api-key': this.config.apiKey});
+
+        const options = { headers };
         return this.http.get<Story[]>(url, options);
     }
 }
