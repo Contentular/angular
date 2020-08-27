@@ -6,6 +6,9 @@ export interface Story {
     seoKeywords: string;
     seoDescription: string;
     seoTitle: string;
+    meta: {
+        [key: string]: string
+    }
 }
 
 export interface Content<T = any> {
