@@ -1,5 +1,5 @@
 import { isPlatformServer } from '@angular/common';
-import { HttpBackend, HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpBackend, HttpClient } from '@angular/common/http';
 import { Inject, Injectable, PLATFORM_ID } from '@angular/core';
 import { Observable, of, ReplaySubject } from 'rxjs';
 import { catchError, map, switchMap, take, tap } from 'rxjs/operators';
@@ -326,9 +326,9 @@ export class ContentularService {
         const baseUrl = `${this.config.apiUrl}/stories/frontend`;
         const url = slug ? baseUrl + '?slug=' + slug : baseUrl;
 
-        const headers = new HttpHeaders({'x-api-key': this.config.apiKey});
+        // const headers = ne({'x-api-key': this.config.apiKey});
 
-        const options = { headers };
+        const options = { params: {'api_key': this.config.apiKey} };
         return this.http.get<Story[]>(url, options);
     }
 }
