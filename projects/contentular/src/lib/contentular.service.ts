@@ -23,6 +23,7 @@ interface ContentularRequestOptions {
 export class ContentularService {
     private cache$ = new ReplaySubject<ContentularCache>(1);
     private currentCache$ = this.cache$.asObservable();
+    cachedStories$ = this.cache$.asObservable().pipe(map(contentularCache => contentularCache.cacheFiles))
     config: ContentularConfig;
     private loadedAllOnce = false;
     private defaultCache: ContentularCache = {
