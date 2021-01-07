@@ -14,6 +14,7 @@ interface ContentularCache {
 }
 
 interface ContentularRequestOptions {
+    apiKey?: string;
     cachingStrategy?: ContentularCachingStrategy;
 }
 
@@ -23,7 +24,7 @@ interface ContentularRequestOptions {
 export class ContentularService {
     private cache$ = new ReplaySubject<ContentularCache>(1);
     private currentCache$ = this.cache$.asObservable();
-    cachedStories$ = this.cache$.asObservable().pipe(map(contentularCache => contentularCache.cacheFiles))
+    cachedStories$ = this.cache$.asObservable().pipe(map(contentularCache => contentularCache.cacheFiles));
     config: ContentularConfig;
     private loadedAllOnce = false;
     private defaultCache: ContentularCache = {
@@ -60,6 +61,10 @@ export class ContentularService {
         if (this.config.persistentCache) {
             this.persistCache();
         }
+    }
+
+    private replaceContentInStory(story: Story) {
+
     }
 
 
@@ -169,17 +174,28 @@ export class ContentularService {
         };
         // console.log('current-strategy', requestOptions.cachingStrategy);
 
+        let responseStream: Observable<Story[]>;
 
         switch (requestOptions.cachingStrategy) {
             case ContentularCachingStrategy.networkOnly:
-                return this.loadBySlugNetworkOnly(slug);
+                responseStream = this.loadBySlugNetworkOnly(slug);
+                break;
 
             case ContentularCachingStrategy.networkFirst:
-                return this.loadBySlugNetworkFirst(slug);
+                responseStream = this.loadBySlugNetworkFirst(slug);
+                break;
 
             case ContentularCachingStrategy.cacheFirst:
-                return this.loadBySlugCacheFirst(slug);
+                responseStream = this.loadBySlugCacheFirst(slug);
+                break;
         }
+
+        return responseStream.pipe(
+            switchMap(stories => this.cachedStories$.pipe(
+                map(cachedStories => cachedStories.filter(cachedStory => stories.some(story => story._id === cachedStory._id))),
+            )),
+            tap(() => console.log('neue story')),
+        );
     }
 
     private loadBySlugNetworkOnly(slug: string): Observable<Story[]> {
@@ -329,7 +345,7 @@ export class ContentularService {
 
         // const headers = ne({'x-api-key': this.config.apiKey});
 
-        const options = { params: {'api_key': this.config.apiKey} };
+        const options = {params: {'api_key': this.config.apiKey}};
         return this.http.get<Story[]>(url, options);
     }
 }
