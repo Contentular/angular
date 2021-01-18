@@ -63,11 +63,6 @@ export class ContentularService {
         }
     }
 
-    private replaceContentInStory(story: Story) {
-
-    }
-
-
     private checkForStorage(): boolean {
         const test = 'test';
         try {
@@ -102,7 +97,10 @@ export class ContentularService {
         const apiCall = this.createApiCall() as Observable<Story[]>;
         return apiCall
             .pipe(
-                tap(() => this.loadedAllOnce = true),
+                tap(stories => {
+                    this.loadedAllOnce = true;
+                    this.updateCache(stories);
+                }),
                 catchError(err => {
                     // console.log('cant get stories');
                     throw err;
