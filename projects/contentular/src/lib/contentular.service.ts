@@ -81,16 +81,24 @@ export class ContentularService {
         };
         // console.log('current-strategy', requestOptions.cachingStrategy);
 
+        let responseStream: Observable<Story[]>;
+
         switch (requestOptions.cachingStrategy) {
             case ContentularCachingStrategy.networkOnly:
-                return this.loadAllNetworkOnly();
+                responseStream = this.loadAllNetworkOnly();
 
             case ContentularCachingStrategy.networkFirst:
-                return this.loadAllNetworkFirst();
+                responseStream = this.loadAllNetworkFirst();
 
             case ContentularCachingStrategy.cacheFirst:
-                return this.loadAllCacheFirst();
+                responseStream = this.loadAllCacheFirst();
         }
+
+        return responseStream.pipe(
+            switchMap(stories => this.cachedStories$.pipe(
+                map(cachedStories => cachedStories.filter(cachedStory => stories.some(story => story._id === cachedStory._id))),
+            )),
+        );
     }
 
     private loadAllNetworkOnly() {
@@ -192,7 +200,6 @@ export class ContentularService {
             switchMap(stories => this.cachedStories$.pipe(
                 map(cachedStories => cachedStories.filter(cachedStory => stories.some(story => story._id === cachedStory._id))),
             )),
-            tap(() => console.log('neue story')),
         );
     }
 
@@ -200,6 +207,7 @@ export class ContentularService {
         const apiCall = this.createApiCall(slug);
         return apiCall
             .pipe(
+                tap(stories => this.updateCache(stories)),
                 catchError(err => {
                     // console.log('cant get stories with slug');
                     throw err;
