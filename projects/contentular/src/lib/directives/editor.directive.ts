@@ -1,5 +1,5 @@
 import { ComponentFactoryResolver, Directive, Input, OnInit, TemplateRef, ViewContainerRef } from '@angular/core';
-import '../../../assets/redactorx/redactorx.js';
+// import '../../../assets/redactorx/redactorx.js';
 import { EditorComponent } from '../components/editor/editor.component';
 
 @Directive({

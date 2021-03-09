@@ -14,8 +14,9 @@ interface ContentularCache {
 }
 
 interface ContentularRequestOptions {
-    apiKey?: string;
-    cachingStrategy?: ContentularCachingStrategy;
+    apiUrl?: string;
+    apiKey: string;
+    cachingStrategy: ContentularCachingStrategy;
 }
 
 @Injectable({
@@ -57,6 +58,7 @@ export class ContentularService {
         };
 
         this.defaultRequestOptions = {
+            ...this.config,
             cachingStrategy: this.config.cachingStrategy,
         };
 
@@ -148,13 +150,16 @@ export class ContentularService {
 
         switch (requestOptions.cachingStrategy) {
             case ContentularCachingStrategy.networkOnly:
-                responseStream = this.loadAllNetworkOnly();
+                responseStream = this.loadAllNetworkOnly(requestOptions);
+                break;
 
             case ContentularCachingStrategy.networkFirst:
-                responseStream = this.loadAllNetworkFirst();
+                responseStream = this.loadAllNetworkFirst(requestOptions);
+                break;
 
             case ContentularCachingStrategy.cacheFirst:
-                responseStream = this.loadAllCacheFirst();
+                responseStream = this.loadAllCacheFirst(requestOptions);
+                break;
         }
 
         return responseStream.pipe(
@@ -164,8 +169,8 @@ export class ContentularService {
         );
     }
 
-    private loadAllNetworkOnly() {
-        const apiCall = this.createApiCall() as Observable<Story[]>;
+    private loadAllNetworkOnly(requestOptions: ContentularRequestOptions) {
+        const apiCall = this.createApiCall(requestOptions) as Observable<Story[]>;
         return apiCall
             .pipe(
                 tap(stories => {
@@ -179,8 +184,8 @@ export class ContentularService {
             );
     }
 
-    private loadAllNetworkFirst(): Observable<Story[]> {
-        const apiCall = this.createApiCall() as Observable<Story[]>;
+    private loadAllNetworkFirst(requestOptions: ContentularRequestOptions): Observable<Story[]> {
+        const apiCall = this.createApiCall(requestOptions) as Observable<Story[]>;
         return apiCall.pipe(
             tap(stories => {
                 this.loadedAllOnce = true;
@@ -208,8 +213,8 @@ export class ContentularService {
         );
     }
 
-    private loadAllCacheFirst(): Observable<Story[]> {
-        const apiCall = this.createApiCall() as Observable<Story[]>;
+    private loadAllCacheFirst(requestOptions: ContentularRequestOptions): Observable<Story[]> {
+        const apiCall = this.createApiCall(requestOptions) as Observable<Story[]>;
         return this.currentCache$.pipe(
             take(1),
             switchMap(cache => {
@@ -247,15 +252,15 @@ export class ContentularService {
 
         switch (requestOptions.cachingStrategy) {
             case ContentularCachingStrategy.networkOnly:
-                responseStream = this.loadBySlugNetworkOnly(slug);
+                responseStream = this.loadBySlugNetworkOnly(requestOptions, slug);
                 break;
 
             case ContentularCachingStrategy.networkFirst:
-                responseStream = this.loadBySlugNetworkFirst(slug);
+                responseStream = this.loadBySlugNetworkFirst(requestOptions, slug);
                 break;
 
             case ContentularCachingStrategy.cacheFirst:
-                responseStream = this.loadBySlugCacheFirst(slug);
+                responseStream = this.loadBySlugCacheFirst(requestOptions, slug);
                 break;
         }
 
@@ -266,8 +271,8 @@ export class ContentularService {
         );
     }
 
-    private loadBySlugNetworkOnly(slug: string): Observable<Story[]> {
-        const apiCall = this.createApiCall(slug);
+    private loadBySlugNetworkOnly(requestOptions: ContentularRequestOptions, slug: string): Observable<Story[]> {
+        const apiCall = this.createApiCall(requestOptions, slug);
         return apiCall
             .pipe(
                 tap(stories => this.updateCache(stories)),
@@ -277,8 +282,8 @@ export class ContentularService {
                 }));
     }
 
-    private loadBySlugCacheFirst(slug: string): Observable<Story[]> {
-        const apiCall = this.createApiCall(slug);
+    private loadBySlugCacheFirst(requestOptions: ContentularRequestOptions, slug: string): Observable<Story[]> {
+        const apiCall = this.createApiCall(requestOptions, slug);
         return this.cache$.pipe(
             take(1),
             map(cache => cache.cacheFiles),
@@ -305,8 +310,8 @@ export class ContentularService {
         );
     }
 
-    private loadBySlugNetworkFirst(slug: string): Observable<Story[]> {
-        const apiCall = this.createApiCall(slug);
+    private loadBySlugNetworkFirst(requestOptions: ContentularRequestOptions, slug: string): Observable<Story[]> {
+        const apiCall = this.createApiCall(requestOptions, slug);
         return apiCall.pipe(
             tap(stories => {
                 this.updateCache(stories);
@@ -408,13 +413,13 @@ export class ContentularService {
         this.cache$.next(updatedCache);
     }
 
-    private createApiCall(slug?: string): Observable<Story[]> {
-        const baseUrl = `${this.config.apiUrl}/stories/frontend`;
+    private createApiCall(requestOptions: ContentularRequestOptions, slug?: string): Observable<Story[]> {
+        const baseUrl = `${requestOptions.apiUrl}/stories/frontend`;
         const url = slug ? baseUrl + '?slug=' + slug : baseUrl;
 
         // const headers = ne({'x-api-key': this.config.apiKey});
 
-        const options = {params: {'api_key': this.config.apiKey}};
+        const options = {params: {'api_key': requestOptions.apiKey || this.config.apiKey}};
         return this.http.get<Story[]>(url, options);
     }
 }
