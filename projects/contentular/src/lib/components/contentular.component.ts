@@ -11,7 +11,6 @@ import {
     ViewChild,
     ViewContainerRef,
 } from '@angular/core';
-import { fromEventPattern } from 'rxjs';
 import { CONTENTULAR_CONFIG, ContentularConfig } from '../contentular.config';
 import { Content } from '../contentular.interfaces';
 
@@ -58,28 +57,6 @@ export class ContentularComponent implements OnInit {
     }
 
     ngOnInit() {
-        let removeMessageEventListener: () => void;
-        const messageEventListener = (handler: (e: Event) => boolean | void) => {
-            removeMessageEventListener = this.renderer2.listen('window', 'message', handler);
-        };
-
-        fromEventPattern(messageEventListener).subscribe((event: any) => {
-            const componentInstance = this.componentRef.instance as {content: Content};
-            if (event.data.type && event.data.type === 'contentUpdate') {
-                const contentsToUpdate: any[] = event.data.payload;
-
-                contentsToUpdate.forEach(contentToUpdate => {
-                    const content = contentToUpdate.update.changes;
-                    console.log('content', content._id);
-                    // console.log(componentInstance.content._id);
-                    if (componentInstance.content && componentInstance.content._id === content._id) {
-                        console.log('FOUND!');
-                        componentInstance.content = {...componentInstance.content, ...content};
-                        this.cdr.markForCheck();
-                    }
-                })
-            }
-        });
     }
 
 }

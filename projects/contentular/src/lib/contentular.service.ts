@@ -1,11 +1,11 @@
 import { isPlatformServer } from '@angular/common';
 import { HttpBackend, HttpClient } from '@angular/common/http';
-import { Inject, Injectable, PLATFORM_ID } from '@angular/core';
-import { Observable, of, ReplaySubject } from 'rxjs';
+import { Inject, Injectable, PLATFORM_ID, Renderer2, RendererFactory2 } from '@angular/core';
+import { fromEventPattern, Observable, of, ReplaySubject } from 'rxjs';
 import { catchError, map, switchMap, take, tap } from 'rxjs/operators';
 import { ContentularCachingStrategy } from './contentular-caching.strategy';
 import { CONTENTULAR_CONFIG, ContentularConfig } from './contentular.config';
-import { Story } from './contentular.interfaces';
+import { Content, Story } from './contentular.interfaces';
 import { ContentularModule } from './contentular.module';
 
 interface ContentularCache {
@@ -35,12 +35,15 @@ export class ContentularService {
     private readonly localStorageAvailable: boolean;
     private readonly defaultRequestOptions: ContentularRequestOptions;
     private readonly http: HttpClient;
+    private readonly renderer2: Renderer2;
 
     constructor(
         @Inject(CONTENTULAR_CONFIG) private contentularConfig,
         @Inject(PLATFORM_ID) private platformId,
         private httpHandler: HttpBackend,
+        private rendererFactory: RendererFactory2,
     ) {
+        this.renderer2 = rendererFactory.createRenderer(null, null);
         this.http = new HttpClient(httpHandler);
 
         this.localStorageAvailable = this.checkForStorage();
@@ -61,6 +64,66 @@ export class ContentularService {
         if (this.config.persistentCache) {
             this.persistCache();
         }
+
+        this.listenForContentUpdates();
+    }
+
+    findAndReplaceContent(contents: Content[], newContent: Content) {
+        return contents.map(content => {
+            if (content._id === newContent._id) {
+                const fieldKeys = Object.keys(newContent.fields);
+
+                for (let i = 0; i < fieldKeys.length; i++) {
+                    if (!Array.isArray(newContent.fields[fieldKeys[i]])) {
+                        content.fields[fieldKeys[i]] = newContent.fields[fieldKeys[i]];
+                    }
+                }
+
+                return {...content};
+            }
+
+            const fieldKeys = Object.keys(content.fields);
+
+            for (let i = 0; i < fieldKeys.length; i++) {
+                if (Array.isArray(content.fields[fieldKeys[i]])) {
+                    const replacedFieldContent = this.findAndReplaceContent(content.fields[fieldKeys[i]], newContent);
+                    if (replacedFieldContent !== content.fields[fieldKeys[i]]) {
+                        content.fields[fieldKeys[i]] = replacedFieldContent;
+                        // Return a copy to change the reference and fix *ngFor issues
+                        return {...content};
+                    }
+                }
+            }
+
+            return content;
+        })
+    }
+
+    listenForContentUpdates() {
+        let removeMessageEventListener: () => void;
+        const messageEventListener = (handler: (e: Event) => boolean | void) => {
+            removeMessageEventListener = this.renderer2.listen('window', 'message', handler);
+        };
+
+        fromEventPattern(messageEventListener).subscribe((event: any) => {
+            if (event.data.type && event.data.type === 'contentUpdate') {
+                this.cache$.pipe(
+                    take(1),
+                    map(cache => cache.cacheFiles),
+                    )
+                    .subscribe(stories => {
+                        const contentsToUpdate: any[] = event.data.payload;
+                        contentsToUpdate.forEach(contentToUpdate => {
+                            const story = stories.find(story => story._id === contentToUpdate.story);
+
+                            if (story) {
+                                story.contents = this.findAndReplaceContent(story.contents, contentToUpdate);
+                                this.updateCache([story]);
+                            }
+                        });
+                    });
+            }
+        });
     }
 
     private checkForStorage(): boolean {

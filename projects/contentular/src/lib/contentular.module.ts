@@ -3,8 +3,10 @@ import { HttpClientModule } from '@angular/common/http';
 import { InjectionToken, ModuleWithProviders, NgModule } from '@angular/core';
 
 import { ContentularComponent } from './components/contentular.component';
+import { EditorComponent } from './components/editor/editor.component';
 import { ContentularCachingStrategy } from './contentular-caching.strategy';
 import { CONTENTULAR_CONFIG, ContentularConfig } from './contentular.config';
+import { EditorDirective } from './directives/editor.directive';
 
 const ROOT_OPTIONS = new InjectionToken<ContentularConfig>('ROOT_OPTIONS');
 
@@ -17,12 +19,13 @@ export function contentularConfigFactory (options: ContentularConfig) {
 }
 
 @NgModule({
-    declarations: [ContentularComponent],
+    declarations: [ContentularComponent, EditorDirective, EditorComponent],
     imports: [
         CommonModule,
         HttpClientModule,
     ],
-    exports: [ContentularComponent],
+    exports: [ContentularComponent, EditorDirective, EditorComponent],
+    entryComponents: [EditorComponent],
 })
 export class ContentularModule {
     static forRoot(userConfig: ContentularConfig): ModuleWithProviders<ContentularModule> {
