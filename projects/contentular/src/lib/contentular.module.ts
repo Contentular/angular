@@ -1,12 +1,13 @@
 import { CommonModule } from '@angular/common';
 import { HttpClientModule } from '@angular/common/http';
-import { InjectionToken, ModuleWithProviders, NgModule } from '@angular/core';
+import { APP_INITIALIZER, InjectionToken, ModuleWithProviders, NgModule } from '@angular/core';
 
 import { ContentularComponent } from './components/contentular.component';
 import { EditorComponent } from './components/editor/editor.component';
 import { ContentularCachingStrategy } from './contentular-caching.strategy';
 import { CONTENTULAR_CONFIG, ContentularConfig } from './contentular.config';
 import { EditorDirective } from './directives/editor.directive';
+import { LivePreviewService } from './services/live-preview.service';
 
 const ROOT_OPTIONS = new InjectionToken<ContentularConfig>('ROOT_OPTIONS');
 
@@ -17,6 +18,8 @@ export function contentularConfigFactory (options: ContentularConfig) {
         ...options,
     };
 }
+
+export function emptyFactory () {}
 
 @NgModule({
     declarations: [ContentularComponent, EditorDirective, EditorComponent],
@@ -41,6 +44,12 @@ export class ContentularModule {
                     useFactory: contentularConfigFactory,
                     deps: [ROOT_OPTIONS],
                 },
+                {
+                    provide: APP_INITIALIZER,
+                    useFactory: emptyFactory,
+                    deps: [LivePreviewService],
+                    multi: true
+                }
             ],
         };
     }
