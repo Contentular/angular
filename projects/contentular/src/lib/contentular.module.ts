@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { HttpClientModule } from '@angular/common/http';
-import { APP_INITIALIZER, InjectionToken, ModuleWithProviders, NgModule } from '@angular/core';
+import { InjectionToken, ModuleWithProviders, NgModule } from '@angular/core';
 
 import { ContentularComponent } from './components/contentular.component';
 import { EditorComponent } from './components/editor/editor.component';
@@ -18,8 +18,6 @@ export function contentularConfigFactory (options: ContentularConfig) {
         ...options,
     };
 }
-
-export function emptyFactory () {}
 
 @NgModule({
     declarations: [ContentularComponent, EditorDirective, EditorComponent],
@@ -44,13 +42,10 @@ export class ContentularModule {
                     useFactory: contentularConfigFactory,
                     deps: [ROOT_OPTIONS],
                 },
-                {
-                    provide: APP_INITIALIZER,
-                    useFactory: emptyFactory,
-                    deps: [LivePreviewService],
-                    multi: true
-                }
             ],
         };
+    }
+
+    constructor(private livePreviewService: LivePreviewService) {
     }
 }

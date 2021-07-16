@@ -28,7 +28,7 @@ export class ContentularComponent implements OnInit {
     componentRef: ComponentRef<unknown>;
 
     @Input() set content(content: Content) {
-        if (typeof this.config.componentMap[content.type] === 'undefined') {
+        if (content && typeof this.config.componentMap[content.type] === 'undefined') {
             console.info(content.type, ' not found');
             return;
         }

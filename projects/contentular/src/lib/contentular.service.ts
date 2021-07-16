@@ -2,7 +2,7 @@ import { isPlatformServer } from '@angular/common';
 import { HttpBackend, HttpClient } from '@angular/common/http';
 import { Inject, Injectable, PLATFORM_ID, Renderer2, RendererFactory2 } from '@angular/core';
 import { fromEventPattern, Observable, of, ReplaySubject } from 'rxjs';
-import { catchError, map, switchMap, take, tap } from 'rxjs/operators';
+import { catchError, map, shareReplay, switchMap, take, tap } from 'rxjs/operators';
 import { ContentularCachingStrategy } from './contentular-caching.strategy';
 import { CONTENTULAR_CONFIG, ContentularConfig } from './contentular.config';
 import { Content, Story } from './contentular.interfaces';
@@ -162,11 +162,15 @@ export class ContentularService {
                 break;
         }
 
-        return responseStream.pipe(
+        const stream = responseStream.pipe(
             switchMap(stories => this.cachedStories$.pipe(
                 map(cachedStories => cachedStories.filter(cachedStory => stories.some(story => story._id === cachedStory._id))),
             )),
+            shareReplay(1),
         );
+
+        stream.subscribe();
+        return stream;
     }
 
     private loadAllNetworkOnly(requestOptions: ContentularRequestOptions) {
