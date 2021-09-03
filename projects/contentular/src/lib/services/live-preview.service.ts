@@ -13,11 +13,16 @@ export class LivePreviewService {
         this.router.events.pipe(
             filter(event => event instanceof NavigationEnd),
         ).subscribe(event => {
-            if (window.parent) {
-                window.parent.postMessage(JSON.stringify({
-                    type: 'routed',
-                    payload: event,
-                }), 'https://app.contentular.io');
+            // console.log(window.parent);
+            if (window.parent !== window.top) {
+                try {
+                    window.parent.postMessage(JSON.stringify({
+                        type: 'routed',
+                        payload: event,
+                    }), 'https://app.contentular.io');
+                } catch (e) {
+
+                }
             }
         });
     }
