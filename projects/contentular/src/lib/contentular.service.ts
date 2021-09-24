@@ -53,7 +53,7 @@ export class ContentularService {
         }
 
         this.config = {
-            apiUrl: 'https://app.contentular.de/api',
+            apiUrl: 'https://app.contentular.io/api',
             ...contentularConfig,
         };
 
