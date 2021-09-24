@@ -220,7 +220,7 @@ export class ContentularService {
         return this.currentCache$.pipe(
             take(1),
             switchMap(cache => {
-                if (cache.cacheFiles.length === 0 || this.loadedAllOnce) {
+                if (cache.cacheFiles.length === 0 || !this.loadedAllOnce) {
                     // console.log('cache empty, try to load');
                     return apiCall.pipe(
                         tap(stories => {
