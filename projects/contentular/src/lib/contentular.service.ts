@@ -9,7 +9,6 @@ import { Content, Story } from './contentular.interfaces';
 import { ContentularModule } from './contentular.module';
 
 interface ContentularCache {
-    loadedAllOnce: boolean;
     cacheFiles: Story[];
 }
 
@@ -29,7 +28,6 @@ export class ContentularService {
     config: ContentularConfig;
     private loadedAllOnce = false;
     private defaultCache: ContentularCache = {
-        loadedAllOnce: false,
         cacheFiles: [],
     };
 
@@ -222,7 +220,7 @@ export class ContentularService {
         return this.currentCache$.pipe(
             take(1),
             switchMap(cache => {
-                if (cache.cacheFiles.length === 0 || !cache.loadedAllOnce) {
+                if (cache.cacheFiles.length === 0 || this.loadedAllOnce) {
                     // console.log('cache empty, try to load');
                     return apiCall.pipe(
                         tap(stories => {
@@ -386,7 +384,6 @@ export class ContentularService {
                 }
             });
             const updatedCache: ContentularCache = {
-                loadedAllOnce: this.loadedAllOnce,
                 cacheFiles: cachedFiles,
             };
             this.cache$.next(updatedCache);
@@ -401,7 +398,6 @@ export class ContentularService {
             const cachedFiles: Story[] = [...currentCache.cacheFiles];
             const updatedCachedFiles = cachedFiles.filter(story => story.slug !== slug);
             const updatedCache: ContentularCache = {
-                loadedAllOnce: this.loadedAllOnce,
                 cacheFiles: updatedCachedFiles,
             };
             this.cache$.next(updatedCache);
@@ -411,7 +407,6 @@ export class ContentularService {
     private removeAllFromCache() {
         // console.log('remove all from Cache');
         const updatedCache: ContentularCache = {
-            loadedAllOnce: this.loadedAllOnce,
             cacheFiles: [],
         };
         this.cache$.next(updatedCache);
