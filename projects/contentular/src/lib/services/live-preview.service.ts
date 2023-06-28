@@ -14,7 +14,7 @@ export class LivePreviewService {
             filter(event => event instanceof NavigationEnd),
         ).subscribe(event => {
             // console.log(window.parent);
-            if (window.parent !== window.top) {
+            if (typeof window !== 'undefined' && window.parent !== window.top) {
                 try {
                     window.parent.postMessage(JSON.stringify({
                         type: 'routed',
