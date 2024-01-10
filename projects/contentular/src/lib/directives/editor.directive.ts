@@ -6,7 +6,7 @@ import { EditorComponent } from '../components/editor/editor.component';
     selector: '[appEditor]',
 })
 export class EditorDirective implements OnInit {
-    @Input() appEditor: string;
+    @Input() appEditor!: string;
 
     // @HostBinding('attr.contenteditable') contentEditable = true;
 

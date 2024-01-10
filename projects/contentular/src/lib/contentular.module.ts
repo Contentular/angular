@@ -25,8 +25,7 @@ export function contentularConfigFactory (options: ContentularConfig) {
         CommonModule,
         HttpClientModule,
     ],
-    exports: [ContentularComponent, EditorDirective, EditorComponent],
-    entryComponents: [EditorComponent],
+    exports: [ContentularComponent, EditorDirective, EditorComponent]
 })
 export class ContentularModule {
     static forRoot(userConfig: ContentularConfig): ModuleWithProviders<ContentularModule> {

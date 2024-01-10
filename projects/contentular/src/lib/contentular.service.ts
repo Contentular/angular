@@ -37,8 +37,8 @@ export class ContentularService {
     private readonly renderer2: Renderer2;
 
     constructor(
-        @Inject(CONTENTULAR_CONFIG) private contentularConfig,
-        @Inject(PLATFORM_ID) private platformId,
+        @Inject(CONTENTULAR_CONFIG) private contentularConfig: ContentularConfig,
+        @Inject(PLATFORM_ID) private platformId: any,
         private httpHandler: HttpBackend,
         private rendererFactory: RendererFactory2,
     ) {
@@ -57,7 +57,7 @@ export class ContentularService {
 
         this.defaultRequestOptions = {
             ...this.config,
-            cachingStrategy: this.config.cachingStrategy,
+            cachingStrategy: this.config.cachingStrategy!,
         };
 
         this.setupInitialCache();
@@ -243,7 +243,7 @@ export class ContentularService {
         );
     }
 
-    public findBySlug(slug: string, options?: ContentularRequestOptions): Observable<Story[]> {
+    public findBySlug(slug: string, options?: Partial<ContentularRequestOptions>): Observable<Story[]> {
         const requestOptions = {
             ...this.defaultRequestOptions,
             ...options,

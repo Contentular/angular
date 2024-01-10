@@ -4,9 +4,9 @@ import {
     Component,
     ComponentFactoryResolver,
     ComponentRef,
+    HostBinding,
     Inject,
     Input,
-    OnInit,
     Renderer2,
     ViewChild,
     ViewContainerRef,
@@ -22,10 +22,15 @@ import { Content } from '../contentular.interfaces';
     styleUrls: ['./contentular.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class ContentularComponent implements OnInit {
-    @ViewChild('templateRef', {read: ViewContainerRef, static: true}) templateRef: ViewContainerRef;
+export class ContentularComponent {
+    @ViewChild('templateRef', { read: ViewContainerRef, static: true }) templateRef!: ViewContainerRef;
+    @Input() flowless = false;
 
-    componentRef: ComponentRef<unknown>;
+    @HostBinding('style.display') get renderFlowLess() {
+        return this.flowless ? 'contents' : null;
+    }
+
+    componentRef!: ComponentRef<unknown>;
 
     @Input() set content(content: Content) {
         if (!content) {
@@ -59,8 +64,4 @@ export class ContentularComponent implements OnInit {
         private cdr: ChangeDetectorRef,
     ) {
     }
-
-    ngOnInit() {
-    }
-
 }

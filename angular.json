@@ -43,9 +43,5 @@
                 }
             }
         }
-    },
-    "defaultProject": "contentular",
-    "cli": {
-        "analytics": false
     }
 }

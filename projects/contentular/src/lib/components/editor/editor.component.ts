@@ -1,5 +1,6 @@
 import { Component, ElementRef, OnInit, Renderer2, TemplateRef, ViewChild } from '@angular/core';
 
+// @ts-ignore
 declare const RedactorX;
 
 @Component({
@@ -8,11 +9,11 @@ declare const RedactorX;
     styleUrls: ['./editor.component.css'],
 })
 export class EditorComponent implements OnInit {
-    @ViewChild('container', { static: true }) container: ElementRef<any>;
+    @ViewChild('container', { static: true }) container!: ElementRef<any>;
 
-    public templateRef: TemplateRef<any>;
-    public html: string;
-    public wrap: string;
+    public templateRef!: TemplateRef<any>;
+    public html!: string;
+    public wrap!: string;
 
     constructor(
         private renderer: Renderer2,

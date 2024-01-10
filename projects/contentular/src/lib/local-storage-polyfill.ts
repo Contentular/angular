@@ -1,23 +1,23 @@
 'use strict'
 const valuesMap = new Map()
 class LocalStorage {
-    getItem (key) {
+    getItem (key: unknown) {
         const stringKey = String(key)
         if (valuesMap.has(key)) {
             return String(valuesMap.get(stringKey))
         }
         return null
     }
-    setItem (key, val) {
+    setItem (key: unknown, val: unknown) {
         valuesMap.set(String(key), String(val))
     }
-    removeItem (key) {
+    removeItem (key: unknown) {
         valuesMap.delete(key)
     }
     clear () {
         valuesMap.clear()
     }
-    key (i) {
+    key (i: number) {
         if (arguments.length === 0) {
             throw new TypeError("Failed to execute 'key' on 'Storage': 1 argument required, but only 0 present.") // this is a TypeError implemented on Chrome, Firefox throws Not enough arguments to Storage.key.
         }
@@ -33,6 +33,7 @@ const instance = new LocalStorage()
 export const LocalStoragePolyfill = new Proxy(instance, {
     set: function (obj, prop, value) {
         if (LocalStorage.prototype.hasOwnProperty(prop)) {
+            // @ts-ignore
             instance[prop] = value
         } else {
             instance.setItem(prop, value)
@@ -41,6 +42,7 @@ export const LocalStoragePolyfill = new Proxy(instance, {
     },
     get: function (target, name) {
         if (LocalStorage.prototype.hasOwnProperty(name)) {
+            // @ts-ignore
             return instance[name]
         }
         if (valuesMap.has(name)) {
