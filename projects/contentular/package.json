@@ -1,20 +1,31 @@
 {
   "name": "@contentular/angular",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "peerDependencies": {
-    "@angular/common": ">=17.0.0-0",
-    "@angular/core": ">=17.0.0-0"
+    "@angular/common": ">=17.3.0-0",
+    "@angular/core": ">=17.3.0-0"
   },
   "license": "MIT",
   "dependencies": {
-      "tslib": "^2.3.0"
+    "tslib": "^2.3.0"
   },
   "main": "bundles/contentular-angular.umd.js",
-  "module": "fesm2015/contentular-angular.js",
+  "module": "fesm2022/contentular-angular.mjs",
   "es2015": "fesm2015/contentular-angular.js",
   "esm2015": "esm2015/contentular-angular.js",
   "fesm2015": "fesm2015/contentular-angular.js",
-  "typings": "contentular-angular.d.ts",
+  "typings": "index.d.ts",
   "metadata": "contentular-angular.metadata.json",
-  "sideEffects": false
+  "sideEffects": false,
+  "exports": {
+    "./package.json": {
+      "default": "./package.json"
+    },
+    ".": {
+      "types": "./index.d.ts",
+      "esm2022": "./esm2022/contentular-angular.mjs",
+      "esm": "./esm2022/contentular-angular.mjs",
+      "default": "./fesm2022/contentular-angular.mjs"
+    }
+  }
 }

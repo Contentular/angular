@@ -10,6 +10,7 @@ import {
     Renderer2,
     ViewChild,
     ViewContainerRef,
+    WritableSignal,
 } from '@angular/core';
 import { CONTENTULAR_CONFIG, ContentularConfig } from '../contentular.config';
 import { Content } from '../contentular.interfaces';
@@ -50,7 +51,12 @@ export class ContentularComponent {
         viewContainerRef.clear();
 
         this.componentRef = viewContainerRef.createComponent(componentFactory);
-        (this.componentRef.instance as {content: Content}).content = content;
+
+        if (typeof (this.componentRef.instance as {content: any}).content?.set === 'function') {
+            (this.componentRef.instance as {content: WritableSignal<Content>}).content.set(content);
+        } else {
+            (this.componentRef.instance as {content: Content}).content = content;
+        }
 
         this.cdr.markForCheck();
     }
