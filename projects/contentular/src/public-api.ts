@@ -10,4 +10,5 @@ export * from './lib/contentular.module';
 export * from './lib/components/contentular.component';
 export * from './lib/components/editor/editor.component';
 export * from './lib/directives/editor.directive';
+export * from './lib/directives/contentular.directive';
 export * from './lib/local-storage-polyfill';

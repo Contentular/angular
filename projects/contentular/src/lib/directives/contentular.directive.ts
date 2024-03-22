@@ -1,34 +1,20 @@
 import {
-    ChangeDetectionStrategy,
     ChangeDetectorRef,
-    Component,
     ComponentRef,
-    HostBinding,
+    Directive,
     Inject,
     Input,
-    ViewChild,
     ViewContainerRef,
     WritableSignal,
 } from '@angular/core';
 import { CONTENTULAR_CONFIG, ContentularConfig } from '../contentular.config';
 import { Content } from '../contentular.interfaces';
 
-@Component({
-    selector: 'contentular',
-    template: `
-        <ng-template #templateRef></ng-template>
-    `,
-    styleUrls: ['./contentular.component.scss'],
-    changeDetection: ChangeDetectionStrategy.OnPush,
+@Directive({
+    selector: '[contentular]',
+    standalone: true,
 })
-export class ContentularComponent {
-    @ViewChild('templateRef', { read: ViewContainerRef, static: true }) templateRef!: ViewContainerRef;
-    @Input() flowless = false;
-
-    @HostBinding('style.display') get renderFlowLess() {
-        return this.flowless ? 'contents' : null;
-    }
-
+export class ContentularDirective {
     componentRef!: ComponentRef<unknown>;
 
     @Input() set content(content: Content) {
@@ -41,10 +27,9 @@ export class ContentularComponent {
             return;
         }
 
-        const viewContainerRef = this.templateRef;
-        viewContainerRef.clear();
+        this.viewContainerRef.clear();
 
-        this.componentRef = viewContainerRef.createComponent(this.config.componentMap[content.type]);
+        this.componentRef = this.viewContainerRef.createComponent(this.config.componentMap[content.type]);
 
         if (typeof (this.componentRef.instance as {content: any}).content?.set === 'function') {
             (this.componentRef.instance as {content: WritableSignal<Content>}).content.set(content);
@@ -58,6 +43,7 @@ export class ContentularComponent {
 
     constructor(
         @Inject(CONTENTULAR_CONFIG) private config: ContentularConfig,
+        private viewContainerRef: ViewContainerRef,
         private cdr: ChangeDetectorRef,
     ) {
     }
